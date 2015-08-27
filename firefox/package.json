@@ -1,0 +1,19 @@
+{
+  "title": "Web Apps Next",
+  "name": "wanaaa",
+  "version": "0.0.1",
+  "description": "Enabling web apps next to escape your tabs",
+  "main": "index.js",
+  "author": "Mozilla WADI",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "permissions": {
+    "cross-domain-content": [
+      "https://marketplace.firefox.com/"
+    ],
+    "multiprocess": true
+  },
+  "license": "Apache 2.0"
+}

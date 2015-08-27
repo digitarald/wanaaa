@@ -1,0 +1,89 @@
+html {
+  font-size: 11px;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font: 1rem/1.41rem Lucida Grande, Helvetica, Helvetica Neue, sans-serif;
+  color: #333;
+  background-color: #fbfbfb;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  flex-direction: column;
+  display: flex;
+}
+
+.is-empty {
+  align-items: center;
+  justify-content: center;
+  color: #808080;
+}
+.image-button {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.pinnable {
+  display: flex;
+  margin: 0.35rem;
+  padding: 0.5rem 1rem 0.5rem 0.71rem;
+  align-items: center;
+  cursor: pointer;
+}
+.pinnable .pinnable-action {
+  height: 4rem;
+  width:  4rem;
+  background-image: url('../pin-32.png');
+  background-size: 2rem;
+  opacity: 0.5;
+}
+.pinnable:hover {
+  background-color: #eaeaea;
+  outline: 1px solid #b7b7b7;
+  -moz-outline-radius: 0.35rem;
+}
+.pinnable:hover .pinnable-action {
+  opacity: 1;
+}
+.pinnable .pinnable-icon {
+  height: 4rem;
+}
+.pinnable .pinnable-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.71rem;
+}
+.pinnable .pinnable-label .pinnable-name {
+  font-size: 1.41rem;
+  padding-bottom: 0.71rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pinnable .pinnable-label .pinnable-host {
+  color: #808080;
+}
+
+.installed {
+  display: flex;
+  flex: 1;
+  border-top: #cdcdcd;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  background-color: #e5e5e5;
+  padding: 1rem;
+}
