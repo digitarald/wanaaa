@@ -7,7 +7,8 @@
     "start": "gulp watch",
     "run": "cd ./dist/firefox && jpm run --debug --profile=addon-dev",
     "test": "cd ./dist/firefox && jpm test --debug --profile=addon-dev",
-    "post": "cd ./dist/firefox && jpm post --debug --post-url http://localhost:8888/ --profile=addon-dev"
+    "post": "cd ./dist/firefox && jpm post --debug --post-url http://localhost:8888/ --profile=addon-dev",
+    "release": "cd ./dist/firefox && jpm xpi && mv *.xpi ../"
   },
   "keywords": [
     "firefox",
