@@ -32,22 +32,22 @@
     // Eslint built-in rules are documented at <http://eslint.org/docs/rules/>
     "block-spacing": [2, "always"],
     "callback-return": 0,         // TBD
-    "camelcase": 0,               // TODO: set to 2
+    "camelcase": 2,
     "comma-spacing": 2,
     "computed-property-spacing": [2, "never"],
-    "consistent-return": 0,       // TODO: set to 2
+    "consistent-return": 2,
     "curly": [2, "all"],
     "dot-location": [2, "property"],
     "eol-last": 2,
     "eqeqeq": [2, "smart"],
     "key-spacing": [2, {"beforeColon": false, "afterColon": true }],
     "linebreak-style": [2, "unix"],
-    "new-cap": 0,                 // TODO: set to 2
+    "new-cap": 0,
     "new-parens": 2,
     "no-alert": 2,
     "no-array-constructor": 2,
     "no-caller": 2,
-    "no-catch-shadow": 0,         // TODO: set to 2
+    "no-catch-shadow": 2,
     "no-class-assign": 2,
     "no-const-assign": 2,
     "no-console": 0,              // Leave as 0. We use console logging in content code.
@@ -85,12 +85,12 @@
     "no-underscore-dangle": 0,    // Leave as 0. Commonly used for private variables.
     "no-unexpected-multiline": 2,
     "no-unneeded-ternary": 2,
-    "no-unused-expressions": 0,   // TODO: Set to 2
-    "no-unused-vars": 0,          // TODO: Set to 2
-    "no-use-before-define": 0,    // TODO: Set to 2
+    "no-unused-expressions": 2,
+    "no-unused-vars": 2,
+    "no-use-before-define": 0,
     "no-useless-call": 2,
     "no-with": 2,
-    "object-curly-spacing": 0,    // [2, "always"],
+    "object-curly-spacing": [2, "never"],
     "quotes": [2, "double", "avoid-escape"],
     "semi": 2,
     "semi-spacing": [2, {"before": false, "after": true}],

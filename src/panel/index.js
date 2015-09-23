@@ -1,13 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import classNames from "classnames";
+import update from "react-addons-update";
 
-class App extends React.Component {
+class Panel extends React.Component {
   constructor() {
     super();
     this.state = {
-      pinnable: null,
       app: null,
       installed: [],
+      recent: [],
       didInit: false
     };
   }
@@ -17,29 +19,52 @@ class App extends React.Component {
   }
 
   didInit(initial) {
+    console.log("didInit", initial);
     this.setState({
       didInit: true,
-      pinnable: initial.pinnable || null,
       app: initial.app || null,
-      installed: initial.installed || []
+      installed: initial.installed || [],
+      recent: initial.recent || []
     });
   }
 
+  mapToInstalled(scope) {
+    return this.state.installed.filter((app) => app.scope === scope)[0];
+  }
+
+  mapToRecent(scope) {
+    return this.state.recent.filter((app) => app.scope === scope)[0];
+  }
+
   render() {
-    const {didInit, pinnable, installed} = this.state;
+    const {didInit, app, installed, recent} = this.state;
     const parts = [];
     if (!didInit) {
       parts.push(
-        <article className="is-empty">Loading …</article>
+        <article
+          className="is-empty"
+          key="empty">
+          Loading …
+        </article>
       );
     } else {
-      if (pinnable) {
+      if (app) {
         parts.push(
-          <Pinnable app={pinnable} />
+          <Install
+            app={app}
+            installed={!!this.mapToInstalled(app.scope)}
+            key="app"
+            onPin={this.handlePin.bind(this)}
+            recent={recent}
+          />
         );
       }
       parts.push(
-        <Installed installed={installed} />
+        <LaunchPad
+          installed={installed}
+          key="installed"
+          onLaunch={this.handleLaunch.bind(this)}
+        />
       );
     }
     return (
@@ -48,36 +73,143 @@ class App extends React.Component {
       </main>
     );
   }
-}
 
-class Pinnable extends React.Component {
-  render() {
-    const {app} = this.props;
-    return (
-      <aside className="pinnable">
-        <img className="pinnable-name" height="60" src={app.icon} />
-        <div className="pinnable-label">
-          <span className="pinnable-name">{app.name}</span>
-          <span className="pinnable-host">{app.host}</span>
-        </div>
-        <button className="pinnable-action image-button"></button>
-      </aside>
-    );
+  handlePin(app) {
+    const installed = this.mapToInstalled(app.scope);
+    if (installed) {
+      self.port.emit("unpinApp", {
+        scope: app.scope
+      });
+      this.setState(update(this.state, {
+        installed: {
+          $splice: [[this.state.installed.indexOf(installed), 1]]
+        },
+        recent: {
+          $push: [installed]
+        }
+      }));
+    } else {
+      self.port.emit("pinApp", {
+        scope: app.scope
+      });
+      const diff = {
+        installed: {
+          $push: [app]
+        }
+      };
+      const recent = this.mapToRecent(app.scope);
+      if (recent) {
+        diff.recent = {
+          $splice: [[this.state.installed.indexOf(recent), 1]]
+        };
+      }
+      this.setState(update(this.state, diff));
+    }
+  }
+
+  handleLaunch(app) {
+    console.log("handleApp", app.scope);
+    self.port.emit("launchApp", {
+      scope: app.scope
+    });
   }
 }
 
-Pinnable.propTypes = {
-  app: React.PropTypes.object
+class Install extends React.Component {
+  render() {
+    const {app, installed, recent} = this.props;
+    const btnCls = classNames("app-action", "image-button", {
+      "is-installed": installed
+    });
+    const host = app.scope.replace(/.*?\/\/(www\.)?|\/$/ig, "");
+
+    let $recent = null;
+    if (recent.length) {
+      const apps = recent
+        .filter((recentApp) => recentApp.scope !== app.scope)
+        .map((recentApp) => {
+          return (
+            <li key={recentApp.scope} onClick={this.handleClick.bind(this, recentApp)}>
+              <img className="app-name" height="60" src={recentApp.icon} />
+            </li>
+          );
+        });
+      $recent = (
+        <ul className="icon-list">{apps}</ul>
+      );
+    } else {
+      $recent = "Keep track of apps that you visited here!";
+    }
+    const clsRecent = classNames("recent", {
+      "is-empty": recent.length > 0
+    });
+
+    return (
+      <section className="pinnables">
+        <div className="app" onClick={this.handleClick.bind(this, app)}>
+          <img className="app-name" height="60" src={app.icon} />
+          <div className="app-label">
+            <span className="app-name">{app.name}</span>
+            <span className="app-host">{host}</span>
+          </div>
+          <button className={btnCls}></button>
+        </div>
+        <div className={clsRecent}>
+          <span className="label">Recent:</span>
+          {$recent}
+        </div>
+      </section>
+    );
+  }
+
+  handleClick(app) {
+    this.props.onPin(app);
+  }
+}
+
+Install.propTypes = {
+  app: React.PropTypes.object,
+  installed: React.PropTypes.bool,
+  onPin: React.PropTypes.func,
+  recent: React.PropTypes.array
 };
 
-class Installed extends React.Component {
+class LaunchPad extends React.Component {
   render() {
+    const {installed} = this.props;
+    let $installed = null;
+    if (!installed.length) {
+      $installed = "Pin the web you want to keep!";
+    } else {
+      const apps = installed.map((app) => {
+        return (
+          <li key={app.scope} onClick={this.handleClick.bind(this, app)}>
+            <img className="app-name" height="60" src={app.icon} />
+          </li>
+        );
+      });
+      $installed = (
+        <ul className="icon-list">{apps}</ul>
+      );
+    }
+    const clsInstalled = classNames("installed", {
+      "is-empty": installed.length > 0
+    });
     return (
-      <article className="installed is-empty">
-        Pin the web you want to keep!
+      <article className="launchpad">
+        <section className={clsInstalled}>{$installed}</section>
       </article>
     );
   }
+
+  handleClick(app) {
+    this.props.onLaunch(app);
+  }
 }
 
-ReactDOM.render(<App />, document.body);
+LaunchPad.propTypes = {
+  installed: React.PropTypes.array,
+  onLaunch: React.PropTypes.func
+};
+
+ReactDOM.render(<Panel />, document.querySelector("#container"));

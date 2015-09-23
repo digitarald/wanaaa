@@ -1,43 +1,62 @@
 export default class Scraper {
   constructor() {
-    this.meta = null;
+    this.results = null;
   }
 
   run() {
-    this.runs++;
-    const meta = {};
+    const results = {
+      origin: window.location.origin,
+      url: window.location.href,
+      title: window.title
+    };
+    const canonical = document.head.querySelector("link[rel='canonical']");
+    if (canonical) {
+      results.canonical = canonical.href;
+    }
+    const icons = this.processIconLinks("link[rel='icon']", 32);
+    if (icons.length) {
+      results.icons = icons;
+    }
     return Promise.all([
-      this.queryManifest(meta),
-      this.queryOG(meta),
-      this.queryApple(meta)
+      this.queryManifest(results),
+      this.queryOG(results),
+      this.queryApple(results)
     ]).then(() => {
-      if (JSON.stringify(this.meta) === JSON.stringify(meta)) {
+      if (JSON.stringify(this.results) === JSON.stringify(results)) {
         return Promise.reject("No change");
       }
-      this.meta = meta;
-      if (!Object.keys(meta).length) {
+      this.results = results;
+      if (!Object.keys(results).length) {
         return Promise.reject("Empty");
       }
-      console.log("Scraper: meta!", meta);
-      return Promise.resolve(meta);
+      return Promise.resolve(results);
     });
   }
 
-  queryManifest(meta) {
-    console.log("queryManifest");
+  queryManifest(results) {
     const manifest = document.head.querySelector("link[rel='manifest']");
     if (!manifest) {
       return true;
     }
-    const src = manifest.getAttribute("href");
-    return fetch(src).then((response) => {
-      return response.json();
-    }).then((response) => {
-      meta.src = src;
-      meta.origin = window.location.origin;
-      meta.manifest = response;
+    const src = manifest.href;
+    if (!src) {
       return Promise.resolve();
-    }).catch((err) => {
+    }
+    const init = {};
+    if (manifest.crossOrigin === "use-credentials") {
+      init.credentials = "include";
+    }
+    const result = {};
+    const request = new Request(src, init);
+    return fetch(request).then((response) => {
+      result.responseUrl = response.url;
+      return response.json();
+    }).then((parsed) => {
+      result.response = parsed;
+      results.manifest = result;
+      return Promise.resolve();
+    }).catch((error) => {
+      console.warn("Could not fetch manifest", src, error);
       return Promise.resolve();
     });
   }
@@ -68,60 +87,49 @@ export default class Scraper {
   }
 
   queryOG(results) {
-    console.log("queryOG");
     const ns = this.getOGNamespace();
-    const meta = {};
+    const result = {};
     for (let element of Array.from(document.head.querySelectorAll(`meta[property^='${ns}']`))) {
       const property = element.getAttribute("property").slice(ns.length);
       const value = element.getAttribute("content");
-      if (!meta.hasOwnProperty(property)) {
-        meta[property] = [];
+      if (!result.hasOwnProperty(property)) {
+        result[property] = [];
       }
-      meta[property].push(value);
+      result[property].push(value);
     }
-    if (!Object.keys(meta).length) {
+    if (!Object.keys(result).length) {
       return;
     }
-    for (let property of Object.keys(meta)) {
-      const value = meta[property];
-      meta[property] = (value.length > 1) ? value : value[0];
+    // Flatten result
+    for (let property of Object.keys(result)) {
+      const value = result[property];
+      result[property] = (value.length > 1) ? value : value[0];
     }
-    results.og = meta;
+    results.og = result;
   }
 
   queryApple(results) {
-    console.log("queryApple");
-    const links = Array.from(document.head.querySelectorAll("link[rel^='apple-touch-icon'], link[rel='icon']"));
-    if (!links.length) {
+    const icons = this.processIconLinks("link[rel^='apple-touch-icon']", 60);
+    if (!icons.length) {
       return;
     }
-    const icons = links.map((link) => {
-      // W3C Manifest icon format
-      return {
-        sizes: link.getAttribute("sizes") || "60x60",
-        src: link.getAttribute("href")
-      };
-    });
-    this.source = "apple";
-    const meta = {
-      title: document.title,
-      url: location.href,
+    const result = {
       icons: icons
     };
-    const canonical = document.querySelector("link[rel='canonical']");
-    if (canonical) {
-      meta.url = canonical.getAttribute("href");
-    }
-    const description = document.querySelector("meta[name='description']");
-    if (description) {
-      meta.description = description.getAttribute("content");
-    }
     const title = document.querySelector("meta[name='apple-mobile-web-app-title']");
     if (title) {
-      meta.title = title.getAttribute("content");
+      result.title = title.content;
     }
-    meta.origin = window.location.origin;
-    results.apple = meta;
-    return;
+    results.apple = result;
+  }
+
+  processIconLinks(selector, size) {
+    return Array.map(document.head.querySelectorAll(selector), (link) => {
+      // W3C Manifest icon format
+      return {
+        sizes: parseInt(link.getAttribute("sizes"), 10) || size,
+        src: link.href
+      };
+    });
   }
 }

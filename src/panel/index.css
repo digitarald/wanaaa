@@ -2,10 +2,10 @@ html {
   font-size: 11px;
 }
 html, body {
-  width: 100%;
-  height: 100%;
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
 }
 body {
   font: 1rem/1.41rem Lucida Grande, Helvetica, Helvetica Neue, sans-serif;
@@ -13,6 +13,12 @@ body {
   background-color: #fbfbfb;
   display: flex;
   flex-direction: column;
+}
+
+#container {
+  flex: 1;
+  flex-direction: column;
+  display: flex;
 }
 
 main {
@@ -26,6 +32,9 @@ main {
   justify-content: center;
   color: #808080;
 }
+.label {
+  color: #808080;
+}
 .image-button {
   border: none;
   background: none;
@@ -37,53 +46,100 @@ main {
   cursor: pointer;
 }
 
-.pinnable {
+.pinnables {
+  display: flex;
+  flex-direction: column;
+}
+
+.app {
   display: flex;
   margin: 0.35rem;
   padding: 0.5rem 1rem 0.5rem 0.71rem;
   align-items: center;
   cursor: pointer;
 }
-.pinnable .pinnable-action {
+.app .app-action {
   height: 4rem;
   width:  4rem;
   background-image: url('../pin-32.png');
   background-size: 2rem;
   opacity: 0.5;
 }
-.pinnable:hover {
+.app .app-action.is-installed {
+  background-image: url('../pin-active-32.png');
+  opacity: 1;
+}
+.app:hover {
   background-color: #eaeaea;
   outline: 1px solid #b7b7b7;
   -moz-outline-radius: 0.35rem;
 }
-.pinnable:hover .pinnable-action {
+.app:hover .app-action {
   opacity: 1;
 }
-.pinnable .pinnable-icon {
+.app .app-icon {
   height: 4rem;
 }
-.pinnable .pinnable-label {
+.app .app-label {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding-left: 0.71rem;
 }
-.pinnable .pinnable-label .pinnable-name {
+.app .app-label .app-name {
   font-size: 1.41rem;
   padding-bottom: 0.71rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pinnable .pinnable-label .pinnable-host {
+.app .app-label .app-host {
   color: #808080;
 }
 
-.installed {
+.launchpad {
   display: flex;
   flex: 1;
+  flex-direction: column;
   border-top: #cdcdcd;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
   background-color: #e5e5e5;
+}
+
+.installed {
+  flex: 1;
+  display: flex;
   padding: 1rem;
+  overflow: auto;
+  align-items: center;
+  justify-content: center;
+}
+.installed .icon-list {
+  flex-wrap: wrap;
+}
+.recent {
+  display: flex;
+  padding: 0.71;
+}
+.recent .icon-list img {
+  height: 2rem;
+}
+
+.icon-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.icon-list li {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.icon-list li:hover {
+  background-color: #eaeaea;
+  outline: 1px solid #b7b7b7;
+  -moz-outline-radius: 0.35rem;
+}
+.icon-list li img {
+  height: 4rem;
 }
